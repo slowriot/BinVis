@@ -17,40 +17,40 @@
 #  along with BinVis.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-CPP_FILES := hilbert.cpp pixel_assign.cpp pixel_generator.cpp
-CPP_OBJS :=  $(CPP_FILES:%.cpp=%.o)
+CXX ?= g++
+PNG_CONFIG ?= libpng-config
+PNG++VER := 0.2.5
+
+CPP_FILES := hilbert.cpp pixel_assign.cpp pixel_generator.cpp bin_vis.cpp
+CPP_OBJS := $(CPP_FILES:%.cpp=%.o)
+CPP_DEPS := $(CPP_OBJS:%.o=%.d)
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
-    CPP_FLAGS := -g3 -DDEBUG
+    CXXFLAGS ?= -g3 -DDEBUG
 else
-    CPP_FLAGS := -O3 -DNDEBUG
+    CXXFLAGS ?= -O3 -DNDEBUG
 endif
 
+CPPFLAGS += -Ipng++-$(PNG++VER) $(shell $(PNG_CONFIG) --cflags)
+LDLIBS += $(shell $(PNG_CONFIG) --ldflags)
 
-CPP := g++
+.PHONY: all png++ test clean
+all: bin_vis
 
-INCLUDE := -L/usr/local/include `libpng-config --cflags`
-LINK_FLAGS := -L/usr/local/lib `libpng-config --ldflags`
-
-PNG++VER := 0.2.5
+bin_vis: $(CPP_OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CPP_OBJS) $(LDLIBS) -o $@
 
 %.o: %.cpp
-	@echo "#  Build " $@
-	$(CPP) $(CPP_FLAGS) $(INCLUDE) -c $< -o $@ 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
-all: png++_link $(CPP_OBJS) bin_vis.o
-	$(CPP) $(CPP_FLAGS) $(CPP_OBJS) bin_vis.o $(LINK_FLAGS) -o bin_vis
+png++:
+	$(MAKE) -C png++-$(PNG++VER)
 
-png++: png++_link
-	make -C ./png++
-
-png++_link:
-	touch png++ && rm png++ && ln -s -f png++-$(PNG++VER) png++
-
-test: ./test/bin_out
-	make -C ./test
+test:
+	$(MAKE) -C test
 
 clean:
-	find ./ -iname '*.o' | xargs rm
-	rm ./bin_vis ./png++ ./test/bin_out
+	$(RM) $(CPP_OBJS) $(CPP_DEPS) bin_vis test/bin_out
+
+-include $(CPP_DEPS)

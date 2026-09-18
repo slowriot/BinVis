@@ -34,15 +34,19 @@
      
 
         ###############################
-        ### Compliation and running ###
+        ### Compilation and running ###
         ###############################
 
- Debian based: sudo apt-get install libpng12-dev
- Redhat based: sudo yum install libpng-devel
+ Debian based: sudo apt-get install build-essential libpng-dev
+ Redhat based: sudo dnf install gcc-c++ make libpng-devel
 
  cd ./BinVis
  make
  ./bin_vis target_binary [ destination_image.png ]
+
+ Run from the project directory so config/config.txt can be found.
+ png++ is bundled; no separate installation or symlink is needed.
+ Use make DEBUG=1 for a debug build (run make clean when switching modes).
  
  The program will attempt to automatically display the newly created png image using "feh", which is 
  a commandline image viewer (needs x or x over ssh). If this isn't possible the png is still produced

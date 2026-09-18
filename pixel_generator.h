@@ -27,7 +27,7 @@
 #include <vector>
 #include <string>
 
-#include "./png++/png.hpp"
+#include <png.hpp>
 
 #include "RGB_point.h"
 
@@ -45,4 +45,3 @@ private:
 };
 
 #endif /* PIXEL_GENERATOR_H_ */
-
